@@ -23,9 +23,11 @@ sub register {
 			my $encoded = encode_base64( "$username:$password", '' ); 
 
 			return $captures if $auth eq $encoded;
-			
+
 			# Verify
 			$plugin->_password_prompt( $tx, $realm ) if $auth ne $encoded;
+
+			return;
 		}
 	);
 }
@@ -35,7 +37,6 @@ sub _password_prompt {
 
 	$tx->res->headers->www_authenticate( "Basic realm='$realm'" );
 	$tx->res->code(401);
-	$tx->render;
 }
 
 1;
