@@ -43,7 +43,7 @@ __END__
 
 =head1 NAME
 
-Mojolicious::Plugin::AuthCondition - Agent Condition Plugin
+Mojolicious::Plugin::BasicAuthCondition - Basic HTTP Auth Condition Plugin
 
 =head1 SYNOPSIS
 
