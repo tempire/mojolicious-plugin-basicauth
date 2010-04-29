@@ -46,7 +46,7 @@ sub _password_prompt {
 	my ($self, $tx, $realm) = @_;
 
 	$tx->res->headers->www_authenticate( "Basic realm='$realm'" );
-	$tx->res->code(404);
+	$tx->res->code(401);
 	#$tx->render;
 }
 
