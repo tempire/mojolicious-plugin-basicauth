@@ -2,8 +2,6 @@ package Mojolicious::Plugin::BasicAuthCondition;
 
 use strict;
 use warnings;
-use Data::Dumper;
-#use MIME::Base64 qw/ encode_base64 /;
 use Mojo::ByteStream;
 
 use base 'Mojolicious::Plugin';
@@ -29,7 +27,9 @@ sub register {
 
 			chop $encoded;
 
-			$tx->res->code(200) and return $captures if $auth eq $encoded;
+			# Verified
+			$tx->res->code(200) and return $captures
+				if $auth eq $encoded;
 
 			# Not verified
 			$plugin->_password_prompt( $tx, $realm );
