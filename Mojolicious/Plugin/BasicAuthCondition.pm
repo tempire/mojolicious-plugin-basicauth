@@ -3,7 +3,8 @@ package Mojolicious::Plugin::BasicAuthCondition;
 use strict;
 use warnings;
 use Data::Dumper;
-use MIME::Base64 qw/ encode_base64 /;
+#use MIME::Base64 qw/ encode_base64 /;
+use Mojo::ByteStream;
 
 use base 'Mojolicious::Plugin';
 
@@ -22,8 +23,13 @@ sub register {
 			$auth =~ s/^Basic //;
 
 			# Verify
-			my $encoded = encode_base64( "$username:$password", '' ); 
-			return $captures if $auth eq $encoded;
+			my $encoded = Mojo::ByteStream->new( "$username:$password" )->
+				b64_encode->
+				to_string;
+
+			chop $encoded;
+
+			$tx->res->code(200) and return $captures if $auth eq $encoded;
 
 			# Not verified
 			$plugin->_password_prompt( $tx, $realm );
@@ -47,7 +53,6 @@ sub _password_prompt {
 
 	$tx->res->headers->www_authenticate( "Basic realm='$realm'" );
 	$tx->res->code(401);
-	#$tx->render;
 }
 
 1;
@@ -61,26 +66,36 @@ Mojolicious::Plugin::BasicAuthCondition - Basic HTTP Auth Condition Plugin
 
     # Mojolicious
     $self->plugin('basic_auth_condition');
-    $self->routes->route('/:controller/:action')->over(basic_auth => realm => username => 'password');
+    my $r = $self->routes;
+
+    my $auth = $r->route->over(basic_auth => realm => username => 'password');
+    $auth->route('/:controller/:action')
 
     # Mojolicious::Lite
     plugin 'basic_auth_condition';
-    get '/' => (basic_auth => [ realm => username => 'password' ] ) => sub {...};
+    get '/' => ( basic_auth => [ realm => username => 'password' ] ) => sub {...};
+    get '/'; # Capture unauthorized requests
 
-    # or, for more specific (and wordy) configuration:
+    # or, for more wordy configuration:
     get '/' => (basic_auth => {
         realm => 'realm',
         username => 'username',
         password => 'password'
     } ) => sub {...};
+    get '/'; # Capture unauthorized requests
+
     
     # To supply only a password (no username)
-    get '/' => (basic_auth => 'password' ) => sub {...};
+    get '/' => ( basic_auth => 'password' ) => sub {...};
+    get '/'; # Capture unauthorized requests
 
 =head1 DESCRIPTION
 
 L<Mojolicous::Plugin::BasicAuthCondition> is a routes condition for basic http authentication
 based routes.
+
+All Mojolicious::Lite actions with basic_auth_condition must have a follow 
+through action to capture processing for unauthorized requests.
 
 =head1 METHODS
 

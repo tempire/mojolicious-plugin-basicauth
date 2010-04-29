@@ -1,9 +1,9 @@
 use Mojo::IOLoop;
 use Test::More;
 use Test::Mojo;
-use MIME::Base64 qw/ encode_base64 /;
+use Mojo::ByteStream;
 
-plan tests => 24;
+plan tests => 33;
 
 # Test server
 Mojo::IOLoop->new->generate_port;
@@ -13,17 +13,21 @@ use Mojolicious::Lite;
 
 plugin 'basic_auth_condition';
 
-get '/' => ( basic_auth => [ realm => username => 'password' ] ) => sub {
-    shift->render_text( 'hello' );
-};
+get '/password_only' => ( basic_auth => 'password' ) => sub { shift->render_text('hello') };
+get '/password_only';
 
 get '/wordy' => ( basic_auth => {
         realm => 'realm', 
         username => 'username', 
         password => 'password'
     } ) => sub { shift->render_text( 'hello' ) };
+get '/wordy';
 
-get '/password_only' => ( basic_auth => 'password' ) => sub { shift->render_text( 'hello' ) };
+get '/' => ( basic_auth => [ realm => username => 'password' ] ) => sub {
+    shift->render_text( 'hello' );
+};
+get '/';
+
 
 
 # Tests
@@ -31,7 +35,7 @@ my $client = app->client;
 my $t = Test::Mojo->new;
 
 # Tests for / and /wordy
-foreach my $url ( qw| / /wordy | ) {
+foreach my $url ( qw| / /wordy /password_only | ) {
 
     diag "$url tests";
 
@@ -46,24 +50,24 @@ foreach my $url ( qw| / /wordy | ) {
         header_is( 'WWW-Authenticate' => "Basic realm='realm'" )->
         status_is(401)->
         content_is('');
-    
+
+	# Different password for /password_only, test outside of loop
+	next if $url eq '/password_only';
     
     # Valid user/pass
-    my $encoded = encode_base64( "username:password", '' );
+    my $encoded = Mojo::ByteStream->new( "username:password" )->b64_encode->to_string;
+    chop $encoded;
     
     $t->get_ok( $url, { Authorization => "Basic $encoded" } )->
         status_is(200)->
         content_is('hello');
 }
 
-
-# Test for /password_only
-diag "/password_only tests";
+# /password_only valid password test
 
 # Valid user/pass
-my $encoded = encode_base64( ':password', '' );
-
+my $encoded = Mojo::ByteStream->new( ":password" )->b64_encode->to_string;
+chop $encoded;
 $t->get_ok( '/password_only', { Authorization => "Basic $encoded" } )->
     status_is(200)->
-    content_is('hello');
-
+    content_is( 'hello' );
