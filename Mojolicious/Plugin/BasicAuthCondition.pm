@@ -74,8 +74,8 @@ Mojolicious::Plugin::BasicAuthCondition - Basic HTTP Auth Condition Plugin
         password => 'password'
     } ) => sub {...};
     
-	 # To supply only a password (no username)
-	 get '/' => (basic_auth => 'password' ) => sub {...};
+    # To supply only a password (no username)
+    get '/' => (basic_auth => 'password' ) => sub {...};
 
 =head1 DESCRIPTION
 

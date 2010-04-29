@@ -37,14 +37,14 @@ foreach my $url ( qw| / /wordy | ) {
 
     # Password prompt
     $t->get_ok( $url )->
-        status_is(404)->
+        status_is(401)->
         header_is( 'WWW-Authenticate' => "Basic realm='realm'" )->
         content_is('');
     
     # Invalid user/pass
     $t->get_ok( $url, { Authorization => "Basic fail" } )->
         header_is( 'WWW-Authenticate' => "Basic realm='realm'" )->
-        status_is(404)->
+        status_is(401)->
         content_is('');
     
     
@@ -64,6 +64,6 @@ diag "/password_only tests";
 my $encoded = encode_base64( ':password', '' );
 
 $t->get_ok( '/password_only', { Authorization => "Basic $encoded" } )->
-#status_is(200)->
+    status_is(200)->
     content_is('hello');
 
