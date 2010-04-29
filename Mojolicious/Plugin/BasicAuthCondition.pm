@@ -12,31 +12,39 @@ sub register {
 
 	$app->routes->add_condition(
 		basic_auth => sub {
-			my ($r, $tx, $captures, $pattern) = @_;
-			
+			my ($r, $tx, $captures, $args) = @_;
+
+			# Required credentials
+			my ($realm, $username, $password) = $plugin->_expected_auth( $args );
+
 			# Sent Credentials
 			my $auth = $tx->req->headers->authorization || '';
 			$auth =~ s/^Basic //;
-			
-			# Required credentials
-			my ($realm, $username, $password) = splice @{$r->conditions}, 1;
-			my $encoded = encode_base64( "$username:$password", '' ); 
-
-			return $captures if $auth eq $encoded;
 
 			# Verify
-			$plugin->_password_prompt( $tx, $realm ) if $auth ne $encoded;
+			my $encoded = encode_base64( "$username:$password", '' ); 
+			return $captures if $auth eq $encoded;
 
-			return;
+			# Not verified
+			$plugin->_password_prompt( $tx, $realm );
 		}
 	);
+}
+
+sub _expected_auth {
+	my ($self, $args) = @_;
+	
+	return @$args if ref $args eq "ARRAY";
+
+	return @$args{ qw/ realm username password / };
 }
 
 sub _password_prompt {
 	my ($self, $tx, $realm) = @_;
 
 	$tx->res->headers->www_authenticate( "Basic realm='$realm'" );
-	$tx->res->code(401);
+	$tx->res->code(404);
+	#$tx->render;
 }
 
 1;
@@ -54,7 +62,14 @@ Mojolicious::Plugin::BasicAuthCondition - Basic HTTP Auth Condition Plugin
 
     # Mojolicious::Lite
     plugin 'basic_auth_condition';
-    get '/' => (basic_auth => realm => username => 'password') => sub {...};
+    get '/' => (basic_auth => [ realm => username => 'password' ] ) => sub {...};
+
+    # or, for more specific (and wordy) configuration:
+    get '/' => (basic_auth => {
+        realm => 'realm',
+        username => 'username',
+        password => 'password'
+    } ) => sub {...};
 
 =head1 DESCRIPTION
 
