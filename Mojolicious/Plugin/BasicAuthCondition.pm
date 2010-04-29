@@ -36,7 +36,10 @@ sub _expected_auth {
 	
 	return @$args if ref $args eq "ARRAY";
 
-	return @$args{ qw/ realm username password / };
+	return @$args{ qw/ realm username password / } if ref $args eq "HASH";
+	
+	# Only password supplied
+	return 'realm', '', $args;
 }
 
 sub _password_prompt {
@@ -70,6 +73,9 @@ Mojolicious::Plugin::BasicAuthCondition - Basic HTTP Auth Condition Plugin
         username => 'username',
         password => 'password'
     } ) => sub {...};
+    
+	 # To supply only a password (no username)
+	 get '/' => (basic_auth => 'password' ] ) => sub {...};
 
 =head1 DESCRIPTION
 
