@@ -112,4 +112,12 @@ Register condition in L<Mojolicious> application.
 
 L<Mojolicious>, L<Mojolicious::Guides>, L<http://mojolicious.org>.
 
+=head1 DEVELOPMENT
+
+http://github.com/tempire/mojolicious-plugin-basicauthcondition
+
+=head1 AUTHOR
+
+Glen Hinkle, glen@empireenterprises.com
+
 =cut
