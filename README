@@ -1,1 +1,18 @@
-See Mojolicious::Plugin::BasicAuth pod, in lib/Mojolicious/Plugin/BasicAuth.pm
+See pod for documentation, in lib/Mojolicious/Plugin/BasicAuth.pm
+
+Installation
+
+cpan Mojolicious::Plugin::BasicAuth
+
+Get source:
+git clone git://github.com/tempire/mojolicious-plugin-basicauthcondition.git
+
+Credits:
+
+* Sebastian Riedel for Mojolicious
+  http://github.com/kraih/mojo.git
+
+* Viacheslav Tykhanovskyi for spreading the love over IRC
+
+* Both of the above for making #mojo a much less abrasive
+  place than #catalyst
