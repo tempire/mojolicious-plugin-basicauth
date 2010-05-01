@@ -4,7 +4,8 @@ Installation
 
 cpan Mojolicious::Plugin::BasicAuth
 
-Get source:
+Source
+
 git clone git://github.com/tempire/mojolicious-plugin-basicauthcondition.git
 
 Basic Usage
