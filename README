@@ -7,6 +7,19 @@ cpan Mojolicious::Plugin::BasicAuth
 Get source:
 git clone git://github.com/tempire/mojolicious-plugin-basicauthcondition.git
 
+Basic Usage
+
+	# Mojolicious::Lite
+	plugin 'basic_auth'
+
+	get '/' => sub {
+	    my $self = shift;
+	    return unless $self->helper( basic_auth => realm => username => 'password' );
+	    ...
+	}
+
+(See Mojolicious::Plugin::BasicAuth POD for more)
+
 Credits:
 
 * Sebastian Riedel for Mojolicious
