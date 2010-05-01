@@ -119,14 +119,14 @@ Register condition in L<Mojolicious> application.
 
 =head1 SEE ALSO
 
-L<Mojolicious>, L<Mojolicious::Guides>, L<http://mojolicious.org>.
+L<Mojolicious>
 
 =head1 DEVELOPMENT
 
-http://github.com/tempire/mojolicious-plugin-basicauthcondition
+L<http://github.com/tempire/mojolicious-plugin-basicauthcondition>
 
 =head1 AUTHOR
 
-Glen Hinkle, glen@empireenterprises.com
+Glen Hinkle L<glen@empireenterprises.com>
 
 =cut
