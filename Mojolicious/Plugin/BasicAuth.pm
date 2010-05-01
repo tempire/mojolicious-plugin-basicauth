@@ -76,26 +76,29 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 	 package MyApp::Controller;
 	 
 	 sub index {
-		 my $self = shift;
-		 return unless $self->helper( basic_auth => realm => username => 'password' );
+		my $self = shift;
+		return unless $self->helper( basic_auth => realm => username => 'password' );
+		...
 	 }
 
 	# Mojolicious::Lite
 	plugin 'basic_auth'
 	get '/' => sub {
 		my $self = shift;
-		$self->render_text( 'authenticated' )
-			if $self->helper( basic_auth => realm => username => 'password' );
+		return unless $self->helper( basic_auth => realm => username => 'password' );
+		...
 	}
 
 	# or, for more wordy configuration:
 	get '/' => sub {
 		my $self = shift;
-		$self->helper( basic_auth => {
-			realm => 'realm',
-			username => 'username',
-			password => 'password'
-		} );
+		
+		return unless
+			$self->helper( basic_auth => {
+				realm => 'realm',
+				username => 'username',
+				password => 'password'
+			} );
 	}
 
 	# Realm and username are optional:
@@ -124,6 +127,10 @@ L<Mojolicious>
 =head1 DEVELOPMENT
 
 L<http://github.com/tempire/mojolicious-plugin-basicauthcondition>
+
+=head1 VERSION
+
+0.01
 
 =head1 AUTHOR
 
