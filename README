@@ -6,7 +6,7 @@ cpan Mojolicious::Plugin::BasicAuth
 
 Source
 
-git clone git://github.com/tempire/mojolicious-plugin-basicauthcondition.git
+git clone git://github.com/tempire/mojolicious-plugin-basicauth.git
 
 Basic Usage
 
