@@ -1,7 +1,8 @@
-package Mojolicious::Plugin::BasicAuthCondition;
+package Mojolicious::Plugin::BasicAuth;
 
 use strict;
 use warnings;
+use Data::Dumper;
 use Mojo::ByteStream;
 
 use base 'Mojolicious::Plugin';
@@ -9,15 +10,15 @@ use base 'Mojolicious::Plugin';
 sub register {
 	my ($plugin, $app) = @_;
 
-	$app->routes->add_condition(
+	$app->renderer->add_helper(
 		basic_auth => sub {
-			my ($r, $tx, $captures, $args) = @_;
+			my $self = shift;
 
 			# Required credentials
-			my ($realm, $username, $password) = $plugin->_expected_auth( $args );
+			my ($password, $username, $realm) = $plugin->_expected_auth( @_ );
 
 			# Sent Credentials
-			my $auth = $tx->req->headers->authorization || '';
+			my $auth = $self->req->headers->authorization || '';
 			$auth =~ s/^Basic //;
 
 			# Verify
@@ -28,31 +29,31 @@ sub register {
 			chop $encoded;
 
 			# Verified
-			$tx->res->code(200) and return $captures
-				if $auth eq $encoded;
+			return $self->res->code(200) if $auth eq $encoded;
 
 			# Not verified
-			$plugin->_password_prompt( $tx, $realm );
+			$plugin->_password_prompt( $self, $realm );
+
+			return;
 		}
 	);
 }
 
 sub _expected_auth {
 	my ($self, $args) = @_;
-	
-	return @$args if ref $args eq "ARRAY";
 
-	return @$args{ qw/ realm username password / } if ref $args eq "HASH";
+	my @args;
 	
-	# Only password supplied
-	return 'realm', '', $args;
+	return @$args{ qw/ password username realm / } if ref $args eq "HASH";
+
+	return reverse splice @_, 1;
 }
 
 sub _password_prompt {
-	my ($self, $tx, $realm) = @_;
-
-	$tx->res->headers->www_authenticate( "Basic realm='$realm'" );
-	$tx->res->code(401);
+	my ($self, $c, $realm) = @_;
+	
+	$c->res->headers->www_authenticate( 'Basic realm=' . ( $realm || '' ) );
+	$c->res->code(401);
 }
 
 1;
@@ -60,46 +61,55 @@ __END__
 
 =head1 NAME
 
-Mojolicious::Plugin::BasicAuthCondition - Basic HTTP Auth Condition Plugin
+Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 
 =head1 SYNOPSIS
 
-    # Mojolicious
-    $self->plugin('basic_auth_condition');
-    my $r = $self->routes;
-
-    my $auth = $r->route->over(basic_auth => realm => username => 'password');
-    $auth->route('/:controller/:action')
-
-    # Mojolicious::Lite
-    plugin 'basic_auth_condition';
-    get '/' => ( basic_auth => [ realm => username => 'password' ] ) => sub {...};
-    get '/'; # Capture unauthorized requests
-
-    # or, for more wordy configuration:
-    get '/' => (basic_auth => {
-        realm => 'realm',
-        username => 'username',
-        password => 'password'
-    } ) => sub {...};
-    get '/'; # Capture unauthorized requests
-
+	# Mojolicious
+	package MyApp;
+	
+	sub startup {
+		 my $self = shift;
+		 $self->plugin('basic_auth');
+		 ...
+	 }
     
-    # To supply only a password (no username)
-    get '/' => ( basic_auth => 'password' ) => sub {...};
-    get '/'; # Capture unauthorized requests
+	 package MyApp::Controller;
+	 
+	 sub index {
+		 my $self = shift;
+		 return unless $self->helper( basic_auth => realm => username => 'password' );
+	 }
+
+	# Mojolicious::Lite
+	plugin 'basic_auth'
+	get '/' => sub {
+		my $self = shift;
+		$self->render_text( 'authenticated' )
+			if $self->helper( basic_auth => realm => username => 'password' );
+	}
+
+	# or, for more wordy configuration:
+	get '/' => sub {
+		my $self = shift;
+		$self->helper( basic_auth => {
+			realm => 'realm',
+			username => 'username',
+			password => 'password'
+		} );
+	}
+
+	# Realm and username are optional:
+	$self->helper( basic_auth => username => 'password' );
+	$self->helper( basic_auth => 'password' );
 
 =head1 DESCRIPTION
 
-L<Mojolicous::Plugin::BasicAuthCondition> is a routes condition for basic http authentication
-based routes.
-
-All Mojolicious::Lite actions with basic_auth_condition must have a follow 
-through action to capture processing for unauthorized requests.
+L<Mojolicous::Plugin::BasicAuth> is a helper for basic http authentication.
 
 =head1 METHODS
 
-L<Mojolicious::Plugin::BasicAuthCondition> inherits all methods from
+L<Mojolicious::Plugin::BasicAuth> inherits all methods from
 L<Mojolicious::Plugin> and implements the following new ones.
 
 =head2 C<register>
