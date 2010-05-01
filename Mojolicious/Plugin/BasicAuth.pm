@@ -2,7 +2,6 @@ package Mojolicious::Plugin::BasicAuth;
 
 use strict;
 use warnings;
-use Data::Dumper;
 use Mojo::ByteStream;
 
 use base 'Mojolicious::Plugin';
@@ -22,10 +21,10 @@ sub register {
 			$auth =~ s/^Basic //;
 
 			# Verify
-			my $encoded = Mojo::ByteStream->new( "$username:$password" )->
+			my $encoded = Mojo::ByteStream->
+				new( ($username||'') . ":$password" )->
 				b64_encode->
 				to_string;
-
 			chop $encoded;
 
 			# Verified
@@ -42,8 +41,6 @@ sub register {
 sub _expected_auth {
 	my ($self, $args) = @_;
 
-	my @args;
-	
 	return @$args{ qw/ password username realm / } if ref $args eq "HASH";
 
 	return reverse splice @_, 1;

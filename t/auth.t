@@ -3,17 +3,34 @@ use Test::More;
 use Test::Mojo;
 use Mojo::ByteStream;
 
-plan tests => 21;
-
-# Test server
-Mojo::IOLoop->new->generate_port;
+# Make sure sockets are working
+plan skip_all => 'working sockets required for this test!'
+  unless Mojo::IOLoop->new->generate_port; # Test server
+plan tests => 28;
 
 # Lite app
 use Mojolicious::Lite;
 
+# Silence
+app->log->level('error');
+
 plugin 'basic_auth';
 
-get '/password_only' => sub {
+get '/realm-user-pass' => sub {
+	my $self = shift;
+	
+	$self->render_text( 'authenticated' )
+		if $self->helper( basic_auth => realm => username => 'password' );
+};
+
+get '/user-pass' => sub {
+	my $self = shift;
+	
+	$self->render_text( 'authenticated' )
+		if $self->helper( basic_auth => username => 'password' );
+};
+
+get '/pass' => sub {
 	my $self = shift;
 	
 	$self->render_text( 'authenticated' ) 
@@ -31,32 +48,25 @@ get '/hashref' => sub {
     	} );
 };
 
-get '/user-pass' => sub {
-	my $self = shift;
-	
-	$self->render_text( 'authenticated' )
-		if $self->helper( basic_auth => username => 'password' );
-};
-
 
 # Tests
 my $client = app->client;
 my $t = Test::Mojo->new;
 my $encoded;
 
-# Password only #
-diag '/password_only';
+# Realm, username, and password #
+diag '/realm-user-pass';
 
 # Failure
-$t->get_ok( '/password_only' )->
+$t->get_ok( '/realm-user-pass' )->
 	status_is(401)->
-	header_is( 'WWW-Authenticate' => 'Basic realm=' )->
+	header_is( 'WWW-Authenticate' => 'Basic realm=realm' )->
 	content_is('');
 
 # Success
-$encoded = Mojo::ByteStream->new( ":password" )->b64_encode->to_string;
+$encoded = Mojo::ByteStream->new( "username:password" )->b64_encode->to_string;
 chop $encoded;
-$t->get_ok( '/password_only', { Authorization => "Basic $encoded" } )->
+$t->get_ok( '/realm-user-pass', { Authorization => "Basic $encoded" } )->
 	status_is(200)->
 	content_is('authenticated');
 
@@ -74,6 +84,23 @@ $t->get_ok( '/user-pass' )->
 $encoded = Mojo::ByteStream->new( "username:password" )->b64_encode->to_string;
 chop $encoded;
 $t->get_ok( '/user-pass', { Authorization => "Basic $encoded" } )->
+	status_is(200)->
+	content_is('authenticated');
+
+
+# Password only #
+diag '/pass';
+
+# Failure
+$t->get_ok( '/pass' )->
+	status_is(401)->
+	header_is( 'WWW-Authenticate' => 'Basic realm=' )->
+	content_is('');
+
+# Success
+$encoded = Mojo::ByteStream->new( ":password" )->b64_encode->to_string;
+chop $encoded;
+$t->get_ok( '/pass', { Authorization => "Basic $encoded" } )->
 	status_is(200)->
 	content_is('authenticated');
 
