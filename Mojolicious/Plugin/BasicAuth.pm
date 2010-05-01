@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use Mojo::ByteStream;
 
+our $VERSION = '0.01';
+
 use base 'Mojolicious::Plugin';
 
 sub register {
