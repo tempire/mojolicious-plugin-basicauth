@@ -139,6 +139,7 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 		# my @auth = $self->helper( basic_auth => 'realm' );
 
 		# No credentials supplied by user
+		# Action falls through to password prompt
 		return unless $auth;
 
 		if( $auth->{username} eq 'username' and 
