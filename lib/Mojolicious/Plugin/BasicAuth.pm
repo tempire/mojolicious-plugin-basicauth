@@ -27,9 +27,6 @@ sub register {
 			return $plugin->_password_prompt( $self, $realm )
 				if ! $auth and ! $callback;
 
-			# Return supplied auth to controller
-			#return $plugin->_supplied_auth( $auth ) if ! $password;
-
 			# Verification within callback
 			return $self->res->code(200)
 				if $callback and $callback->( $plugin->_supplied_auth( $auth ) );
