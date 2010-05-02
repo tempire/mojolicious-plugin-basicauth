@@ -104,7 +104,8 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 	sub index {
 		my $self = shift;
 		return unless $self->helper( basic_auth => realm => username => 'password' );
-		...
+		
+		$self->render_text( 'authenticated' );
 	}
 
 	
@@ -117,7 +118,8 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 		
 		# Username is optional:
 		# $self->helper( basic_auth => realm => 'password' );
-		...
+		
+		$self->render_text( 'authenticated' );
 	}
 
 	# or, for more wordy configuration:
@@ -130,6 +132,8 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 				username => 'username',
 				password => 'password'
 			} );
+		
+		$self->render_text( 'authenticated' );
 	}
 
 
@@ -149,6 +153,8 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 
 	# Without callback
 	get '/' => sub {
+		my $self = shift;
+		
 		return unless $self->helper( basic_auth => 'realm' );
 
 		# Hashref or list (my @auth = ...)
