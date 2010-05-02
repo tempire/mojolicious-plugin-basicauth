@@ -28,7 +28,7 @@ sub register {
 				if ! $auth and ! $callback;
 
 			# Return supplied auth to controller
-			return $plugin->_supplied_auth( $auth ) if ! $password;
+			#return $plugin->_supplied_auth( $auth ) if ! $password;
 
 			# Verification within callback
 			return $self->res->code(200)
@@ -36,7 +36,7 @@ sub register {
 
 			# Verify supplied credentials
 			my $encoded = Mojo::ByteStream->
-				new( ($username||'') . ':' . ($password||'') )->
+				new( ($username||'') . ':' . $password )->
 				b64_encode->
 				to_string;
 			chop $encoded;
@@ -53,13 +53,9 @@ sub register {
 sub _supplied_auth {
 	my $self = shift;
 	
-	my @auth = split /:/, Mojo::ByteStream->new( shift )->
+	return split /:/, Mojo::ByteStream->new( shift )->
 		b64_decode->
 		to_string;
-
-	return wantarray ?
-		@auth :
-		{ username => $auth[0], password => $auth[1] };
 }
 
 sub _expected_auth {
@@ -75,7 +71,7 @@ sub _expected_auth {
 sub _password_prompt {
 	my ($self, $c, $realm) = @_;
 	
-	$c->res->headers->www_authenticate( 'Basic realm=' . ( $realm || '' ) );
+	$c->res->headers->www_authenticate( "Basic realm=$realm" );
 	$c->res->code(401);
 
 	return;
@@ -89,6 +85,8 @@ __END__
 Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 
 =head1 SYNOPSIS
+
+	## Simple usage ##
 
 	# Mojolicious
 	package MyApp;
@@ -137,37 +135,19 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 	}
 
 
-	# Advanced - verify credentials within the controller
+	## Advanced usage ## - Verify credentials within the controller with callback
 
-	# With callback
 	get '/' => sub {
 		my $self = shift;
 
 		return unless $self->helper( basic_auth => realm => sub {
 			my ($username, $password) = @_;
-			return $username eq 'username' and $password eq 'password';
+			
+			return 1 if $username eq 'username' and $password eq 'password';
 		} );
 
 		$self->render_text( 'authenticated' );
 	};
-
-	# Without callback
-	get '/' => sub {
-		my $self = shift;
-		
-		return unless $self->helper( basic_auth => 'realm' );
-
-		# Hashref or list (my @auth = ...)
-		my $auth = $self->helper( basic_auth => 'realm' );
-		return unless $auth;
-
-		if( $auth->{username} eq 'username' and 
-			$auth->{password} eq 'password' ) {
-
-			$self->res->code(200);
-			$self->render_text( 'authenticated' );
-		}
-	}
 
 =head1 DESCRIPTION
 
