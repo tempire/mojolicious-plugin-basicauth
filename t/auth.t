@@ -69,6 +69,20 @@ get '/get-auth-hashref' => sub {
 	}
 };
 
+# Entered user/pass supplied to callback
+get '/get-auth-callback' => sub {
+	my $self = shift;
+
+	$self->helper( basic_auth => realm => sub {
+		my ($username, $password) = @_;
+		
+		return 	$username eq 'username' and
+					$password eq 'password';
+	} );
+
+die $self->res->code;
+	$self->render_text( 'authenticated' );
+};
 
 # Tests
 my $client = app->client;
@@ -83,14 +97,14 @@ foreach( qw(
 	/pass
 	/hashref
 	/get-auth-hashref 
-	/get-auth-list ) ) {
+	/get-auth-list
+	) ) {
 
 	$t->get_ok( $_ )->
 		status_is(401)->
 		header_is( 'WWW-Authenticate' => 'Basic realm=realm' )->
 		content_is('');
 }
-
 
 # Successes #
 

@@ -18,7 +18,7 @@ sub register {
 			# Sent Credentials
 			my $auth = $self->req->headers->authorization || '';
 			$auth =~ s/^Basic //;
-			
+
 			# Required credentials
 			my ($realm, $password, $username) = $plugin->_expected_auth( @_ );
 
@@ -26,8 +26,7 @@ sub register {
 			return $plugin->_password_prompt( $self, $realm ) if ! $auth;
 
 			# No required credentials, return supplied auth to controller
-			return $plugin->_supplied_auth( $auth ) 
-				if ! $username and ! $password;
+			return $plugin->_supplied_auth( $auth ) if ! $password;
 
 			# Verify if supplied credentials
 			my $encoded = Mojo::ByteStream->
@@ -132,11 +131,10 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 	get '/' => sub {
 		return unless $self->helper( basic_auth => 'realm' );
 
+		# Hashref or list (my @auth = ...)
 		my $auth = $self->helper( basic_auth => 'realm' );
-		# Can also return list
-		# my @auth = $self->helper( basic_auth => 'realm' );
 
-		# No credentials, falls through to passwork prompt
+		# No credentials, falls through to password prompt
 		return unless $auth;
 
 		if( $auth->{username} eq 'username' and 
