@@ -105,13 +105,17 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 		my $self = shift;
 		return unless $self->helper( basic_auth => realm => username => 'password' );
 		...
-	 }
+	}
 
+	
 	# Mojolicious::Lite
 	plugin 'basic_auth'
 	get '/' => sub {
 		my $self = shift;
 		return unless $self->helper( basic_auth => realm => username => 'password' );
+		
+		# Username is optional:
+		# $self->helper( basic_auth => realm => 'password' );
 		...
 	}
 
@@ -127,10 +131,8 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 			} );
 	}
 
-	# Username is optional:
-	$self->helper( basic_auth => realm => 'password' );
 
-	# To compare credentials within the controller
+	# Advanced - to compare credentials within the controller
 	get '/' => sub {
 		return unless $self->helper( basic_auth => 'realm' );
 
