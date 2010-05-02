@@ -139,7 +139,6 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 
 		return unless $self->helper( basic_auth => realm => sub {
 			my ($username, $password) = @_;
-			
 			return 1 if $username eq 'username' and $password eq 'password';
 		} );
 
