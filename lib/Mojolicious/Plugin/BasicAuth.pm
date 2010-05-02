@@ -27,13 +27,14 @@ sub register {
 			return $plugin->_password_prompt( $self, $realm )
 				if ! $auth and ! $callback;
 
-			# No required credentials, return supplied auth to controller
+			# Return supplied auth to controller
 			return $plugin->_supplied_auth( $auth ) if ! $password;
 
+			# Verification within callback
 			return $self->res->code(200)
 				if $callback and $callback->( $plugin->_supplied_auth( $auth ) );
 
-			# Verify if supplied credentials
+			# Verify supplied credentials
 			my $encoded = Mojo::ByteStream->
 				new( ($username||'') . ':' . ($password||'') )->
 				b64_encode->
@@ -67,7 +68,7 @@ sub _expected_auth {
 
 	return @$realm{ qw/ realm password username / } if ref $realm eq "HASH";
 
-	# realm, pass, user || realm, pass, undef
+	# realm, pass, user || realm, pass, undef || realm, callback
 	return $realm, reverse @_;
 }
 
