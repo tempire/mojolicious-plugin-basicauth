@@ -166,7 +166,7 @@ L<Mojolicious>
 
 =head1 DEVELOPMENT
 
-L<http://github.com/tempire/mojolicious-plugin-basicauthcondition>
+L<http://github.com/tempire/mojolicious-plugin-basicauth>
 
 =head1 VERSION
 
