@@ -25,7 +25,7 @@ sub register {
 			# No credentials entered
 			return $plugin->_password_prompt( $self, $realm ) if ! $auth;
 
-			# No required credentials, return supplied auth to application
+			# No required credentials, return supplied auth to controller
 			return $plugin->_supplied_auth( $auth ) 
 				if ! $username and ! $password;
 
