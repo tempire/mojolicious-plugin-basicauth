@@ -6,7 +6,7 @@ use Mojo::ByteStream;
 # Make sure sockets are working
 plan skip_all => 'working sockets required for this test!'
 	unless Mojo::IOLoop->new->generate_port; # Test server
-plan tests => 35;
+plan tests => 42;
 
 # Lite app
 use Mojolicious::Lite;
@@ -73,14 +73,14 @@ get '/get-auth-hashref' => sub {
 get '/get-auth-callback' => sub {
 	my $self = shift;
 
-	$self->helper( basic_auth => realm => sub {
+	return unless $self->helper( basic_auth => realm => sub {
 		my ($username, $password) = @_;
 		
-		return 	$username eq 'username' and
+		return 	@_ == 2 and
+					$username eq 'username' and
 					$password eq 'password';
 	} );
 
-die $self->res->code;
 	$self->render_text( 'authenticated' );
 };
 
@@ -98,6 +98,7 @@ foreach( qw(
 	/hashref
 	/get-auth-hashref 
 	/get-auth-list
+	/get-auth-callback
 	) ) {
 
 	$t->get_ok( $_ )->
@@ -145,6 +146,14 @@ $t->get_ok( '/get-auth-hashref', { Authorization => "Basic $encoded" } )->
 
 # Return supplied user/pass as list
 diag '/get-auth-list';
+$encoded = Mojo::ByteStream->new( "username:password" )->b64_encode->to_string;
+chop $encoded;
+$t->get_ok( '/get-auth-list', { Authorization => "Basic $encoded" } )->
+	status_is(200)->
+	content_is('authenticated');
+
+# With callback
+diag '/get-auth-callback';
 $encoded = Mojo::ByteStream->new( "username:password" )->b64_encode->to_string;
 chop $encoded;
 $t->get_ok( '/get-auth-list', { Authorization => "Basic $encoded" } )->

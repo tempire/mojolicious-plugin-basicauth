@@ -21,12 +21,17 @@ sub register {
 
 			# Required credentials
 			my ($realm, $password, $username) = $plugin->_expected_auth( @_ );
+			my $callback = $password if ref $password eq 'CODE';
 
 			# No credentials entered
-			return $plugin->_password_prompt( $self, $realm ) if ! $auth;
+			return $plugin->_password_prompt( $self, $realm )
+				if ! $auth and ! $callback;
 
 			# No required credentials, return supplied auth to controller
 			return $plugin->_supplied_auth( $auth ) if ! $password;
+
+			return $self->res->code(200)
+				if $callback and $callback->( $plugin->_supplied_auth( $auth ) );
 
 			# Verify if supplied credentials
 			my $encoded = Mojo::ByteStream->
@@ -128,13 +133,25 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 
 
 	# Advanced - verify credentials within the controller
+
+	# With callback
+	get '/' => sub {
+		my $self = shift;
+
+		return unless $self->helper( basic_auth => realm => sub {
+			my ($username, $password) = @_;
+			return $username eq 'username' and $password eq 'password';
+		} );
+
+		$self->render_text( 'authenticated' );
+	};
+
+	# Without callback
 	get '/' => sub {
 		return unless $self->helper( basic_auth => 'realm' );
 
 		# Hashref or list (my @auth = ...)
 		my $auth = $self->helper( basic_auth => 'realm' );
-
-		# No credentials, falls through to password prompt
 		return unless $auth;
 
 		if( $auth->{username} eq 'username' and 
