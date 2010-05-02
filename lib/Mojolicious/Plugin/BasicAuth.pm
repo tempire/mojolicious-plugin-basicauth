@@ -19,8 +19,8 @@ sub register {
 			my $auth = $self->req->headers->authorization || '';
 			$auth =~ s/^Basic //;
 			
-			# Get required credentials
-			my ($realm, $username, $password) = $plugin->_expected_auth( @_ );
+			# Required credentials
+			my ($realm, $password, $username) = $plugin->_expected_auth( @_ );
 
 			# No credentials entered
 			return $plugin->_password_prompt( $self, $realm ) if ! $auth;
@@ -61,13 +61,10 @@ sub _expected_auth {
 	my $self = shift;
 	my $realm = shift;
 
-	return @$realm{ qw/ realm username password / } if ref $realm eq "HASH";
+	return @$realm{ qw/ realm password username / } if ref $realm eq "HASH";
 
-	# realm, user, pass
-	return $realm, @_ if @_ == 2;
-	
-	# realm, pass
-	return $realm, undef, @_;
+	# realm, pass, user || realm, pass, undef
+	return $realm, reverse @_;
 }
 
 sub _password_prompt {
@@ -95,11 +92,11 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 		 my $self = shift;
 		 $self->plugin('basic_auth');
 		 ...
-	 }
+	}
     
-	 package MyApp::Controller;
+	package MyApp::Controller;
 	 
-	 sub index {
+	sub index {
 		my $self = shift;
 		return unless $self->helper( basic_auth => realm => username => 'password' );
 		...
@@ -108,6 +105,7 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 	
 	# Mojolicious::Lite
 	plugin 'basic_auth'
+	
 	get '/' => sub {
 		my $self = shift;
 		return unless $self->helper( basic_auth => realm => username => 'password' );
@@ -130,20 +128,19 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 	}
 
 
-	# Advanced - to compare credentials within the controller
+	# Advanced - verify credentials within the controller
 	get '/' => sub {
 		return unless $self->helper( basic_auth => 'realm' );
 
 		my $auth = $self->helper( basic_auth => 'realm' );
-		# Also works with a list:
+		# Can also return list
 		# my @auth = $self->helper( basic_auth => 'realm' );
 
-		# No credentials supplied by user
-		# Action falls through to password prompt
+		# No credentials, falls through to passwork prompt
 		return unless $auth;
 
 		if( $auth->{username} eq 'username' and 
-		$auth->{password} eq 'password' ) {
+			$auth->{password} eq 'password' ) {
 
 			$self->res->code(200);
 			$self->render_text( 'authenticated' );
