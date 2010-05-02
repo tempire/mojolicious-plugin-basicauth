@@ -40,9 +40,7 @@ sub register {
 			return $self->res->code(200) if $auth eq $encoded;
 
 			# Not verified
-			$plugin->_password_prompt( $self, $realm );
-
-			return;
+			return $plugin->_password_prompt( $self, $realm );
 		}
 	);
 }
