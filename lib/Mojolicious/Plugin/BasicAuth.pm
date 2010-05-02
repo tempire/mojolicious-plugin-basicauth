@@ -132,7 +132,7 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 	}
 
 
-	## Advanced usage ## - Verify credentials within the controller with callback
+	## Advanced usage ##  Verify credentials within the controller with callback
 
 	get '/' => sub {
 		my $self = shift;

@@ -19,7 +19,7 @@ Basic Usage
 	    ...
 	}
 
-(See Mojolicious::Plugin::BasicAuth POD for more)
+(See Mojolicious::Plugin::BasicAuth POD for more advanced usage)
 
 Credits:
 
