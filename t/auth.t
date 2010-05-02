@@ -6,7 +6,7 @@ use Mojo::ByteStream;
 # Make sure sockets are working
 plan skip_all => 'working sockets required for this test!'
   unless Mojo::IOLoop->new->generate_port; # Test server
-plan tests => 28;
+plan tests => 35;
 
 # Lite app
 use Mojolicious::Lite;
@@ -16,25 +16,25 @@ app->log->level('error');
 
 plugin 'basic_auth';
 
-get '/realm-user-pass' => sub {
+#get '/realm-user-pass' => sub {
+#	my $self = shift;
+#	
+#	$self->render_text( 'authenticated' )
+#		if $self->helper( basic_auth => realm => username => 'password' );
+#};
+
+get '/user-pass' => sub {
 	my $self = shift;
 	
 	$self->render_text( 'authenticated' )
 		if $self->helper( basic_auth => realm => username => 'password' );
 };
 
-get '/user-pass' => sub {
-	my $self = shift;
-	
-	$self->render_text( 'authenticated' )
-		if $self->helper( basic_auth => username => 'password' );
-};
-
 get '/pass' => sub {
 	my $self = shift;
 	
 	$self->render_text( 'authenticated' ) 
-		if $self->helper( basic_auth => 'password' );
+		if $self->helper( basic_auth => 'realm' => 'password' );
 };
 
 get '/hashref' => sub {
@@ -48,17 +48,46 @@ get '/hashref' => sub {
     	} );
 };
 
+# Predefined user/pass not supplied list
+get '/get-auth-list' => sub {
+	my $self = shift;
+
+	my @auth = $self->helper( basic_auth => 'realm' );
+	return unless @auth;
+	
+	if( join( ' ', @auth ) eq 'username password' ) {
+		$self->res->code(200);
+		$self->render_text( 'authenticated' );
+	}
+};
+
+# Predefined user/pass not supplied hashref
+get '/get-auth-hashref' => sub {
+	my $self = shift;
+
+	my $auth = $self->helper( basic_auth => 'realm' );
+	return unless $auth;
+	
+	if( $auth->{username} eq 'username' and 
+			$auth->{password} eq 'password' ) {
+
+		$self->res->code(200);
+		$self->render_text( 'authenticated' );
+	}
+};
+
 
 # Tests
 my $client = app->client;
 my $t = Test::Mojo->new;
 my $encoded;
 
-# Realm, username, and password #
-diag '/realm-user-pass';
+
+# Return supplied user/pass as hashref
+diag '/get-auth-hashref';
 
 # Failure
-$t->get_ok( '/realm-user-pass' )->
+$t->get_ok( '/get-auth-hashref' )->
 	status_is(401)->
 	header_is( 'WWW-Authenticate' => 'Basic realm=realm' )->
 	content_is('');
@@ -66,9 +95,43 @@ $t->get_ok( '/realm-user-pass' )->
 # Success
 $encoded = Mojo::ByteStream->new( "username:password" )->b64_encode->to_string;
 chop $encoded;
-$t->get_ok( '/realm-user-pass', { Authorization => "Basic $encoded" } )->
+$t->get_ok( '/get-auth-hashref', { Authorization => "Basic $encoded" } )->
 	status_is(200)->
 	content_is('authenticated');
+
+
+# Return supplied user/pass as list
+diag '/get-auth-list';
+
+# Failure
+$t->get_ok( '/get-auth-list' )->
+	status_is(401)->
+	header_is( 'WWW-Authenticate' => 'Basic realm=realm' )->
+	content_is('');
+
+# Success
+$encoded = Mojo::ByteStream->new( "username:password" )->b64_encode->to_string;
+chop $encoded;
+$t->get_ok( '/get-auth-list', { Authorization => "Basic $encoded" } )->
+	status_is(200)->
+	content_is('authenticated');
+
+
+## Realm, username, and password #
+#diag '/realm-user-pass';
+#
+## Failure
+#$t->get_ok( '/realm-user-pass' )->
+#	status_is(401)->
+#	header_is( 'WWW-Authenticate' => 'Basic realm=realm' )->
+#	content_is('');
+#
+## Success
+#$encoded = Mojo::ByteStream->new( "username:password" )->b64_encode->to_string;
+#chop $encoded;
+#$t->get_ok( '/realm-user-pass', { Authorization => "Basic $encoded" } )->
+#	status_is(200)->
+#	content_is('authenticated');
 
 
 # Username, password, no realm #
@@ -77,7 +140,7 @@ diag '/user-pass';
 # Failure
 $t->get_ok( '/user-pass' )->
 	status_is(401)->
-	header_is( 'WWW-Authenticate' => 'Basic realm=' )->
+	header_is( 'WWW-Authenticate' => 'Basic realm=realm' )->
 	content_is('');
 
 # Success
@@ -94,7 +157,7 @@ diag '/pass';
 # Failure
 $t->get_ok( '/pass' )->
 	status_is(401)->
-	header_is( 'WWW-Authenticate' => 'Basic realm=' )->
+	header_is( 'WWW-Authenticate' => 'Basic realm=realm' )->
 	content_is('');
 
 # Success
