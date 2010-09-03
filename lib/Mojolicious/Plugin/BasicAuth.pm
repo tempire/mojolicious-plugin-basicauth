@@ -28,8 +28,8 @@ sub register {
 				if ! $auth and ! $callback;
 
 			# Verification within callback
-			return $self->res->code(200)
-				if $callback and $callback->( $plugin->_supplied_auth( $auth ) );
+			return 1 if $callback
+				and $callback->( $plugin->_supplied_auth( $auth ) );
 
 			# Verify supplied credentials
 			my $encoded = Mojo::ByteStream->
@@ -39,7 +39,7 @@ sub register {
 			chop $encoded;
 
 			# Verified
-			return $self->res->code(200) if $auth eq $encoded;
+			return 1 if $auth eq $encoded;
 
 			# Not verified
 			return $plugin->_password_prompt( $self, $realm );
