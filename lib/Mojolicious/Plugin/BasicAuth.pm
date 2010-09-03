@@ -16,8 +16,7 @@ sub register {
 			my $self = shift;
 
 			# Sent Credentials
-			my $auth = $self->req->headers->authorization || '';
-			$auth =~ s/^Basic //;
+			my $auth = $self->req->url->to_abs->userinfo;
 
 			# Required credentials
 			my ($realm, $password, $username) = $plugin->_expected_auth( @_ );
@@ -28,31 +27,15 @@ sub register {
 				if ! $auth and ! $callback;
 
 			# Verification within callback
-			return 1 if $callback
-				and $callback->( $plugin->_supplied_auth( $auth ) );
-
-			# Verify supplied credentials
-			my $encoded = Mojo::ByteStream->
-				new( ($username||'') . ':' . $password )->
-				b64_encode->
-				to_string;
-			chop $encoded;
+			return 1 if $callback and $callback->( split /:/, $auth );
 
 			# Verified
-			return 1 if $auth eq $encoded;
-
+			return 1 if $auth eq ($username||'') . ":$password";
+			
 			# Not verified
 			return $plugin->_password_prompt( $self, $realm );
 		}
 	);
-}
-
-sub _supplied_auth {
-	my $self = shift;
-	
-	return split /:/, Mojo::ByteStream->new( shift )->
-		b64_decode->
-		to_string;
 }
 
 sub _expected_auth {
