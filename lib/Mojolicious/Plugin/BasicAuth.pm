@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Mojo::ByteStream;
 
-our $VERSION = '0.01';
+our $VERSION = '0.03';
 
 use base 'Mojolicious::Plugin';
 
@@ -68,9 +68,12 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 
 L<Mojolicous::Plugin::BasicAuth> is a helper for basic http authentication.
 
+B<Note>
+This version (0.03) is for Mojolicious versions 0.999930 and above; please use version 0.02 with older versions of Mojolicious.
+
 =head1 USAGE
-		
-=head2 Mojolicious
+
+=head2 Simple - Mojolicious
 
 	# Mojolicious
 	package MyApp;
@@ -85,18 +88,22 @@ L<Mojolicous::Plugin::BasicAuth> is a helper for basic http authentication.
 	 
 	sub index {
 		my $self = shift;
-		return unless $self->helper( basic_auth => realm => username => 'password' );
+		
+		$self->render_text('denied')
+			unless $self->helper( basic_auth => realm => username => 'password' );
 		
 		$self->render_text( 'authenticated' );
 	}
 
-=head2 Mojolicious::Lite
+=head2 Simple - Mojolicious::Lite
 
 	plugin 'basic_auth'
 	
 	get '/' => sub {
 		my $self = shift;
-		return unless $self->helper( basic_auth => realm => username => 'password' );
+		
+		$self->render_text('denied')
+			unless $self->helper( basic_auth => realm => username => 'password' );
 		
 		# Username is optional:
 		# $self->helper( basic_auth => realm => 'password' );
@@ -104,31 +111,18 @@ L<Mojolicous::Plugin::BasicAuth> is a helper for basic http authentication.
 		$self->render_text( 'authenticated' );
 	}
 
-=head2 Hashref configuration
-
-	# or, for more wordy configuration:
-	get '/' => sub {
-		my $self = shift;
-		
-		return unless
-			$self->helper( basic_auth => {
-				realm => 'realm',
-				username => 'username',
-				password => 'password'
-			} );
-		
-		$self->render_text( 'authenticated' );
-	}
-
-=head2 Advanced usage - Verification in callback
+=head2 Advanced - Verification in callback
 
 	get '/' => sub {
 		my $self = shift;
 
-		return unless $self->helper( basic_auth => realm => sub {
+		my $authenticate = sub {
 			my ($username, $password) = @_;
 			return 1 if $username eq 'username' and $password eq 'password';
-		} );
+		};
+
+		$self->render_text('denied')
+			unless $self->helper( basic_auth => realm => $authenticate );
 
 		$self->render_text( 'authenticated' );
 	};
@@ -154,7 +148,7 @@ L<http://github.com/tempire/mojolicious-plugin-basicauth>
 
 =head1 VERSION
 
-0.01
+0.03
 
 =head1 AUTHOR
 
