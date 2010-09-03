@@ -1,27 +1,28 @@
 See pod for documentation, in lib/Mojolicious/Plugin/BasicAuth.pm
 
-Installation
+# Installation #
 
 cpan Mojolicious::Plugin::BasicAuth
 
-Source
+# Source #
 
 git clone git://github.com/tempire/mojolicious-plugin-basicauth.git
 
-Basic Usage
+# Basic Usage #
 
-	# Mojolicious::Lite
+	use Mojolicious::Lite;
 	plugin 'basic_auth'
 
 	get '/' => sub {
 	    my $self = shift;
-	    return unless $self->helper( basic_auth => realm => username => 'password' );
+	    $self->render_text('denied')
+		 	unless $self->helper( basic_auth => realm => username => 'password' );
 	    ...
-	}
+	};
 
 (See Mojolicious::Plugin::BasicAuth POD for more advanced usage)
 
-Credits:
+# Credits #
 
 * Sebastian Riedel for Mojolicious
   http://github.com/kraih/mojo.git
