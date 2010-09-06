@@ -1,0 +1,22 @@
+---
+abstract: 'Basic HTTP Auth Helper'
+author:
+  - 'Glen Hinkle <tempire@cpan.org>'
+build_requires:
+  Mojo::IOLoop: 0
+  Mojolicious::Lite: 0
+  Test::Mojo: 0
+  Test::More: 0
+configure_requires:
+  ExtUtils::MakeMaker: 6.31
+dynamic_config: 0
+generated_by: 'Dist::Zilla version 4.102340, CPAN::Meta::Converter version 2.102400'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Mojolicious-Plugin-BasicAuth
+requires:
+  Mojo::ByteStream: 0
+  Mojolicious::Plugin: 0
+version: 0.03
