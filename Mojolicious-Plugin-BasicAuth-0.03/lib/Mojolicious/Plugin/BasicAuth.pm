@@ -16,7 +16,7 @@ sub register {
 			my $self = shift;
 
 			# Sent Credentials
-			my $auth = $self->req->url->to_abs->userinfo;
+			my $auth = $self->req->url->to_abs->userinfo || '';
 
 			# Required credentials
 			my ($realm, $password, $username) = $plugin->_expected_auth( @_ );
