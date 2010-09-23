@@ -81,7 +81,7 @@ please use version 0.02 with older versions of Mojolicious.
 
 		my $callback = sub {
 			my ($username, $password) = @_;
-			return 1 if $self->verify_in_database($username, $password)
+			return 1 if $self->verify_in_database($username, $password);
 		};
 
 		$self->render_text('denied')

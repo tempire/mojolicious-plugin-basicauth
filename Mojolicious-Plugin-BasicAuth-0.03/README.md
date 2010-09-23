@@ -18,7 +18,7 @@ git clone git://github.com/tempire/mojolicious-plugin-basicauth.git
 
 		my $callback = sub {
 			my ($username, $password) = @_;
-			return 1 if $self->verify_in_database($username, $password)
+			return 1 if $self->verify_in_database($username, $password);
 		};
 
 		$self->render_text('denied')
