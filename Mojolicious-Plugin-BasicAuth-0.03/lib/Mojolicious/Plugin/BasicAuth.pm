@@ -69,63 +69,34 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 L<Mojolicous::Plugin::BasicAuth> is a helper for basic http authentication.
 
 B<Note>
-This version (0.03) is for Mojolicious versions 0.999930 and above; please use version 0.02 with older versions of Mojolicious.
+This version (0.03) is for Mojolicious versions 0.999930 and above; 
+please use version 0.02 with older versions of Mojolicious.
 
 =head1 USAGE
 
-=head2 Simple - Mojolicious
+=head2 Authenticate with callback
 
-	# Mojolicious
-	package MyApp;
-	
-	sub startup {
-		 my $self = shift;
-		 $self->plugin('basic_auth');
-		 ...
-	}
-    
-	package MyApp::Controller;
-	 
-	sub index {
-		my $self = shift;
-		
-		$self->render_text('denied')
-			unless $self->basic_auth( realm => username => 'password' );
-		
-		$self->render_text( 'authenticated' );
-	}
-
-=head2 Simple - Mojolicious::Lite
-
-	plugin 'basic_auth'
-	
 	get '/' => sub {
 		my $self = shift;
-		
+
+		my $callback = sub {
+			my ($username, $password) = @_;
+			return 1 if $self->verify_in_database($username, $password)
+		};
+
+		$self->render_text('denied')
+			unless $self->basic_auth( realm => $callback );
+
+		$self->render_text('authenticated');
+	};
+
+=head2 Alternate simple usage
+
 		$self->render_text('denied')
 			unless $self->basic_auth( realm => username => 'password' );
 		
 		# Username is optional:
 		# $self->basic_auth( realm => 'password' );
-		
-		$self->render_text( 'authenticated' );
-	}
-
-=head2 Advanced - Verification in callback
-
-	get '/' => sub {
-		my $self = shift;
-
-		my $authenticate = sub {
-			my ($username, $password) = @_;
-			return 1 if $username eq 'username' and $password eq 'password';
-		};
-
-		$self->render_text('denied')
-			unless $self->basic_auth( realm => $authenticate );
-
-		$self->render_text( 'authenticated' );
-	};
 
 =head1 METHODS
 

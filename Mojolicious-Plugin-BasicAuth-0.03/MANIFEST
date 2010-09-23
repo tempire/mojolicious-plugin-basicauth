@@ -4,12 +4,6 @@ MANIFEST
 META.yml
 Makefile.PL
 README.md
-cover_db/runs/1283880086.14770.07954/cover.12
-cover_db/runs/1283880120.14807.40429/cover.12
-cover_db/runs/1283880169.15467.19658/cover.12
-cover_db/runs/1283880731.17613.28657/cover.12
-cover_db/structure/d8fbd66cbd618d3f0a09e38944d683d7
-cover_db/structure/dfd5416faf76392eb3bad24215e0c94f
 dist.ini
 lib/Mojolicious/Plugin/BasicAuth.pm
 t/auth.t
