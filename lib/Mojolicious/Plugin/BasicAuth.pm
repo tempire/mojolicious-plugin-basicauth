@@ -69,35 +69,36 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 L<Mojolicous::Plugin::BasicAuth> is a helper for basic http authentication.
 
 B<Note>
-This version (0.03) is for Mojolicious versions 0.999930 and above; 
-please use version 0.02 with older versions of Mojolicious.
+This version (0.03) is for Mojolicious versions 0.999930 and above; please use version 0.02 with older versions of Mojolicious.
 
 =head1 USAGE
 
-=head2 Authenticate with callback
+=head2 Callback
+
+	use Mojolicious::Lite;
+
+	plugin 'basic_auth';
 
 	get '/' => sub {
 		my $self = shift;
 
-		my $callback = sub {
-			my ($username, $password) = @_;
-			return 1 if $self->verify_in_database($username, $password);
-		};
-
-		$self->render_text('denied')
-			unless $self->basic_auth( realm => $callback );
+		$self->render_text('denied') unless $self->basic_auth(
+			realm => sub {
+				my ($user, $pass) = @_;
+				return 1 if $user eq 'user' and $pass eq 'pass';
+			} );
 
 		$self->render_text('authenticated');
 	};
 
-=head2 Alternate simple usage
+=head2 Alternate usage
 
 		$self->render_text('denied')
-			unless $self->basic_auth( realm => username => 'password' );
+			unless $self->basic_auth( realm => user => 'pass' );
 		
 		# Username is optional:
 		# $self->basic_auth( realm => 'password' );
-
+		
 =head1 METHODS
 
 L<Mojolicious::Plugin::BasicAuth> inherits all methods from
