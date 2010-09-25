@@ -19,10 +19,12 @@ git clone git://github.com/tempire/mojolicious-plugin-basicauth.git
 	get '/' => sub {
 		my $self = shift;
 
-		return unless $self->basic_auth( realm => sub {
-			my ($user, $pass) = @_;
-			return 1 if $user eq 'user' and $pass eq 'pass';
-		} );
+		$self->render_text('denied') unless $self->basic_auth(
+			realm => sub {
+				my ($user, $pass) = @_;
+				return 1 if $user eq 'user' and $pass eq 'pass';
+			}
+		);
 
 		$self->render_text('authenticated');
 	};

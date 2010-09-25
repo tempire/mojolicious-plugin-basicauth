@@ -86,7 +86,8 @@ This version (0.03) is for Mojolicious versions 0.999930 and above; please use v
 			realm => sub {
 				my ($user, $pass) = @_;
 				return 1 if $user eq 'user' and $pass eq 'pass';
-			} );
+			}
+		);
 
 		$self->render_text('authenticated');
 	};
