@@ -73,60 +73,33 @@ This version (0.03) is for Mojolicious versions 0.999930 and above; please use v
 
 =head1 USAGE
 
-=head2 Simple - Mojolicious
+=head2 Callback
 
-	# Mojolicious
-	package MyApp;
-	
-	sub startup {
-		 my $self = shift;
-		 $self->plugin('basic_auth');
-		 ...
-	}
-    
-	package MyApp::Controller;
-	 
-	sub index {
-		my $self = shift;
-		
-		$self->render_text('denied')
-			unless $self->basic_auth( realm => username => 'password' );
-		
-		$self->render_text( 'authenticated' );
-	}
+	use Mojolicious::Lite;
 
-=head2 Simple - Mojolicious::Lite
+	plugin 'basic_auth';
 
-	plugin 'basic_auth'
-	
 	get '/' => sub {
 		my $self = shift;
-		
+
+		$self->render_text('denied') unless $self->basic_auth(
+			realm => sub {
+				my ($user, $pass) = @_;
+				return 1 if $user eq 'user' and $pass eq 'pass';
+			}
+		);
+
+		$self->render_text('authenticated');
+	};
+
+=head2 Alternate usage
+
 		$self->render_text('denied')
-			unless $self->basic_auth( realm => username => 'password' );
+			unless $self->basic_auth( realm => user => 'pass' );
 		
 		# Username is optional:
 		# $self->basic_auth( realm => 'password' );
 		
-		$self->render_text( 'authenticated' );
-	}
-
-=head2 Advanced - Verification in callback
-
-	get '/' => sub {
-		my $self = shift;
-
-		my $authenticate = sub {
-			my ($username, $password) = @_;
-			return 1 if $username eq 'username' and $password eq 'password';
-		};
-
-		$self->render_text('denied')
-			unless $self->basic_auth( realm => $authenticate );
-
-		$self->render_text( 'authenticated' );
-	};
-
 =head1 METHODS
 
 L<Mojolicious::Plugin::BasicAuth> inherits all methods from
