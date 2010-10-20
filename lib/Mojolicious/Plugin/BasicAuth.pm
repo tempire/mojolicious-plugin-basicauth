@@ -82,15 +82,19 @@ This version (0.03) is for Mojolicious versions 0.999930 and above; please use v
 	get '/' => sub {
 		my $self = shift;
 
-		$self->render_text('denied') unless $self->basic_auth(
-			realm => sub {
-				my ($user, $pass) = @_;
-				return 1 if $user eq 'user' and $pass eq 'pass';
-			}
-		);
+		my $callback = sub {
+			return 1
+				if $_[0] eq 'username'
+				and $_[1] eq 'password';
+		};
 
-		$self->render_text('authenticated');
+		$self->render_text('denied') 
+			if ! $self->basic_auth( realm => $callback );
+
+		$self->render_text('ok!');
 	};
+
+	app->start;
 
 =head2 Alternate usage
 
