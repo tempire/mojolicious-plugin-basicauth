@@ -1,4 +1,0 @@
-0.03 2010-08-06
-	- Deprecated hashref configuration
-	- Updated to work with Mojolicious async changes >= 0.999930
-	- Updated to work with new Mojolicious helper syntax (http://github.com/kraih/mojo/commit/5ca4d3d61fff693da48662485e96ce5297033f62)
