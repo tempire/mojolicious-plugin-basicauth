@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Mojo::ByteStream;
 
-our $VERSION = '0.03a';
+our $VERSION = '0.031';
 
 use base 'Mojolicious::Plugin';
 
@@ -69,7 +69,7 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 L<Mojolicous::Plugin::BasicAuth> is a helper for basic http authentication.
 
 B<Note>
-This version (0.03) is for Mojolicious versions 0.999930 and above; please use version 0.02 with older versions of Mojolicious.
+Requires Mojolicious versions 0.999930 and above; please use version 0.02 with older versions of Mojolicious.
 
 =head1 USAGE
 
@@ -125,7 +125,7 @@ L<http://github.com/tempire/mojolicious-plugin-basicauth>
 
 =head1 VERSION
 
-0.03a
+0.031
 
 =head1 AUTHOR
 
