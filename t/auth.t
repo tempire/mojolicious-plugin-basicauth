@@ -19,7 +19,7 @@ plugin 'basic_auth';
 get '/user-pass' => sub {
 	my $self = shift;
 	
-	$self->render_text('denied')
+	return $self->render_text('denied')
 		unless $self->basic_auth( realm => username => 'password' );
 
 	$self->render_text('authenticated');
@@ -28,7 +28,7 @@ get '/user-pass' => sub {
 get '/pass' => sub {
 	my $self = shift;
 	
-	$self->render_text('denied')
+	return $self->render_text('denied')
 		unless $self->basic_auth( realm => 'password' );
 	
 	$self->render_text('authenticated');
@@ -38,15 +38,14 @@ get '/pass' => sub {
 get '/get-auth-callback' => sub {
 	my $self = shift;
 
-	my $authenticated = sub {
-		my ($username, $password) = @_;
-		return 1 if @_ == 2 and 
-			$username eq 'username' and 
-			$password eq 'password';
+	my $callback = sub {
+		my $username = shift || '';
+		my $password = shift || '';
+		return 1 if $username eq 'username' and $password eq 'password';
 	};
 
-	$self->render_text('denied') 
-		unless $self->basic_auth( realm => $authenticated );
+	return $self->render_text('denied') 
+		unless $self->basic_auth( realm => $callback );
 
 	$self->render_text('authenticated');
 };
@@ -66,10 +65,10 @@ foreach( qw(
 	) ) {
 
 	# No user/pass
-	$t->get_ok( $_ )->
-		status_is(401)->
-		header_is( 'WWW-Authenticate' => 'Basic realm=realm' )->
-		content_is('denied');
+	$t->get_ok( $_ )
+		->status_is(401)
+		->header_is( 'WWW-Authenticate' => 'Basic realm=realm' )
+		->content_is('denied');
 
 	# Incorrect user/pass
 	$encoded = Mojo::ByteStream->new( 'bad:auth' )->b64_encode->to_string;

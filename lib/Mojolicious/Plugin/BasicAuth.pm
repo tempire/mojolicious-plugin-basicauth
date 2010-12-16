@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Mojo::ByteStream;
 
-our $VERSION = '0.031';
+our $VERSION = '0.032';
 
 use base 'Mojolicious::Plugin';
 
@@ -29,9 +29,9 @@ sub register {
 			# Verification within callback
 			return 1 if $callback and $callback->( split /:/, $auth );
 
-			# Verified
+			# Verified with realm => username => password syntax
 			return 1 if $auth eq ($username||'') . ":$password";
-			
+
 			# Not verified
 			return $plugin->_password_prompt( $self, $realm );
 		}
@@ -68,9 +68,6 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 
 L<Mojolicous::Plugin::BasicAuth> is a helper for basic http authentication.
 
-B<Note>
-Requires Mojolicious versions 0.999930 and above; please use version 0.02 with older versions of Mojolicious.
-
 =head1 USAGE
 
 =head2 Callback
@@ -83,13 +80,13 @@ Requires Mojolicious versions 0.999930 and above; please use version 0.02 with o
 		my $self = shift;
 
 		my $callback = sub {
-			return 1
-				if $_[0] eq 'username'
-				and $_[1] eq 'password';
+			my $username = shift || '';
+			my $password = shift || '';
+			return 1 $username eq 'username' and $password eq 'password';
 		};
 
-		$self->render_text('denied') 
-			if ! $self->basic_auth( realm => $callback );
+		return $self->render_text('denied') 
+			unless $self->basic_auth( realm => $callback );
 
 		$self->render_text('ok!');
 	};
@@ -98,8 +95,8 @@ Requires Mojolicious versions 0.999930 and above; please use version 0.02 with o
 
 =head2 Alternate usage
 
-		$self->render_text('denied')
-			unless $self->basic_auth( realm => user => 'pass' );
+		return $self->render_text('denied')
+			unless $self->basic_auth( realm => username => 'password' );
 		
 		# Username is optional:
 		# $self->basic_auth( realm => 'password' );
@@ -125,7 +122,7 @@ L<http://github.com/tempire/mojolicious-plugin-basicauth>
 
 =head1 VERSION
 
-0.031
+0.032
 
 =head1 AUTHOR
 

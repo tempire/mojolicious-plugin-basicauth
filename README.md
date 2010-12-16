@@ -20,13 +20,13 @@ git clone git://github.com/tempire/mojolicious-plugin-basicauth.git
 		my $self = shift;
 
 		my $callback = sub {
-			return 1
-				if $_[0] eq 'username'
-				and $_[1] eq 'password';
+			my $username = shift || '';
+			my $password = shift || '';
+			return 1 $username eq 'username' and $password eq 'password';
 		};
 
-		$self->render_text('denied') 
-			if ! $self->basic_auth( realm => $callback );
+		return $self->render_text('denied') 
+			unless $self->basic_auth( realm => $callback );
 
 		$self->render_text('ok!');
 	};
@@ -35,12 +35,10 @@ git clone git://github.com/tempire/mojolicious-plugin-basicauth.git
 
 ## Alternate usage
 
-		return unless $self->basic_auth( realm => user => 'pass' );
+		return unless $self->basic_auth( realm => username => 'password' );
 		
-		# User is optional:
-		# $self->basic_auth( realm => 'pass' );
-
-(See Mojolicious::Plugin::BasicAuth POD for more advanced usage)
+		# Username is optional:
+		# $self->basic_auth( realm => 'password' );
 
 # Credits
 

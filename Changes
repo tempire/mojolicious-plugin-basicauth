@@ -1,3 +1,7 @@
+0.032 2010-12-15
+	- Tests and examples return ->render_text to render immediately in .999950
+	- Require Mojolicious >= 0.999950
+
 0.031 2010-10-21
 	- Require Mojolicious >= 0.999930
 
