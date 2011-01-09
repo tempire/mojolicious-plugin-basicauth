@@ -1,0 +1,65 @@
+=head1 NAME
+
+Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
+
+=head1 DESCRIPTION
+
+L<Mojolicous::Plugin::BasicAuth> is a helper for basic http authentication.
+
+=head1 USAGE
+
+    use Mojolicious::Lite;
+
+    plugin 'basic_auth';
+
+    get '/' => sub {
+        my $self = shift;
+
+        return $self->render_text('ok')
+          if $self->basic_auth(
+                  realm => sub { return 1 "@_" eq 'username password' }
+          );
+    };
+
+    app->start;
+
+=head1 METHODS
+
+L<Mojolicious::Plugin::BasicAuth> inherits all methods from
+L<Mojolicious::Plugin> and implements the following new ones.
+
+=head2 C<register>
+
+    $plugin->register;
+
+Register condition in L<Mojolicious> application.
+
+=head1 SEE ALSO
+
+L<Mojolicious>
+
+=head1 DEVELOPMENT
+
+L<http://github.com/tempire/mojolicious-plugin-basicauth>
+
+=head1 VERSION
+
+0.033
+
+=head1 CREDITS
+
+=over 4
+
+=item Sebastian Riedel (sri) for L<Mojolicious>
+
+=item Viacheslav Tykhanovskyi (vti) for spreading the love over IRC
+
+=item Both of the above for making #mojo a much less abrasive place than #catalyst
+
+=back
+
+=head1 AUTHOR
+
+Glen Hinkle tempire@cpan.org
+
+=cut
