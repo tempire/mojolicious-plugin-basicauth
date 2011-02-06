@@ -6,7 +6,7 @@ use Mojo::ByteStream;
 # Make sure sockets are working
 plan skip_all => 'working sockets required for this test!'
   unless Mojo::IOLoop->new->generate_port;    # Test server
-plan tests => 33;
+plan tests => 39;
 
 # Lite app
 use Mojolicious::Lite;
@@ -19,10 +19,11 @@ plugin 'basic_auth';
 get '/user-pass' => sub {
     my $self = shift;
 
-    return $self->render_text('denied')
+    #return $self->render_text('denied')
+    return $self->render(text => 'denied')
       unless $self->basic_auth(realm => username => 'password');
 
-    $self->render_text('authenticated');
+    $self->render_text('authorized');
 };
 
 get '/pass' => sub {
@@ -31,23 +32,28 @@ get '/pass' => sub {
     return $self->render_text('denied')
       unless $self->basic_auth(realm => 'password');
 
-    $self->render_text('authenticated');
+    $self->render_text('authorized');
 };
 
 # Entered user/pass supplied to callback
 get '/get-auth-callback' => sub {
     my $self = shift;
 
-    my $callback = sub {
-        my $username = shift || '';
-        my $password = shift || '';
-        return 1 if $username eq 'username' and $password eq 'password';
-    };
-
     return $self->render_text('denied')
-      unless $self->basic_auth(realm => $callback);
+      unless $self->basic_auth(
+        realm => sub { return 1 if "@_" eq 'username password' });
 
-    $self->render_text('authenticated');
+    $self->render_text('authorized');
+};
+
+under sub {
+    my $self = shift;
+    return $self->basic_auth(
+        realm => sub { return 1 if "@_" eq 'username password' });
+};
+
+get '/under-bridge' => sub {
+    shift->render(text => 'authorized');
 };
 
 # Tests
@@ -80,6 +86,13 @@ foreach (
       ->content_is('denied');
 }
 
+# Under bridge fail
+diag '/under-bridge';
+$encoded = Mojo::ByteStream->new("bad:auth")->b64_encode->to_string;
+chop $encoded;
+$t->get_ok('/under-bridge', {Authorization => "Basic $encoded"})
+  ->status_is(401)->content_is('');
+
 # Successes #
 
 # Username, password
@@ -87,18 +100,26 @@ diag '/user-pass';
 $encoded = Mojo::ByteStream->new("username:password")->b64_encode->to_string;
 chop $encoded;
 $t->get_ok('/user-pass', {Authorization => "Basic $encoded"})->status_is(200)
-  ->content_is('authenticated');
+  ->content_is('authorized');
 
 # Password only
 diag '/pass';
 $encoded = Mojo::ByteStream->new(":password")->b64_encode->to_string;
 chop $encoded;
 $t->get_ok('/pass', {Authorization => "Basic $encoded"})->status_is(200)
-  ->content_is('authenticated');
+  ->content_is('authorized');
 
 # With callback
 diag '/get-auth-callback';
 $encoded = Mojo::ByteStream->new("username:password")->b64_encode->to_string;
 chop $encoded;
 $t->get_ok('/get-auth-callback', {Authorization => "Basic $encoded"})
-  ->status_is(200)->content_is('authenticated');
+  ->status_is(200)->content_is('authorized');
+
+# Under bridge
+diag '/under-bridge';
+$encoded = Mojo::ByteStream->new("username:password")->b64_encode->to_string;
+chop $encoded;
+$t->get_ok('/under-bridge', {Authorization => "Basic $encoded"})
+  ->status_is(200)->content_is('authorized');
+

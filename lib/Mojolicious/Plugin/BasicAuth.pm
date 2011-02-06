@@ -53,6 +53,7 @@ sub _password_prompt {
 
     $c->res->headers->www_authenticate("Basic realm=$realm");
     $c->res->code(401);
+    $c->rendered;
 
     return;
 }
@@ -79,7 +80,7 @@ L<Mojolicous::Plugin::BasicAuth> is a helper for basic http authentication.
 
         return $self->render_text('ok')
           if $self->basic_auth(
-                  realm => sub { return 1 "@_" eq 'username password' }
+                  realm => sub { return 1 if "@_" eq 'username password' }
           );
     };
 
