@@ -107,7 +107,7 @@ L<http://github.com/tempire/mojolicious-plugin-basicauth>
 
 =head1 VERSION
 
-0.03
+0.04
 
 =head1 CREDITS
 
