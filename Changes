@@ -1,5 +1,8 @@
+0.04  2011-02-06
+    - Fixed problem that may have caused unexpected results when using bridges
+    - Require Mojolicious >= 1.02
+
 0.033 2011-01-09 (Cosmetic changes only)
-    - No more tabs 
     - Simpler pod
     - DEPRECATED non-callback usage.  Still works, but will be removed in future releases.
 
