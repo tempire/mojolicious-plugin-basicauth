@@ -44,7 +44,7 @@ L<http://github.com/tempire/mojolicious-plugin-basicauth>
 
 =head1 VERSION
 
-0.04
+0.05
 
 =head1 CREDITS
 
@@ -60,6 +60,6 @@ L<http://github.com/tempire/mojolicious-plugin-basicauth>
 
 =head1 AUTHOR
 
-Glen Hinkle tempire@cpan.org
+Glen Hinkle <tempire@cpan.org>
 
 =cut
