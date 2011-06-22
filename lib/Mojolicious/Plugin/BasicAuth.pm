@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Mojo::ByteStream;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use base 'Mojolicious::Plugin';
 
@@ -15,6 +15,7 @@ sub register {
         basic_auth => sub {
             my $self = shift;
 
+            #
             # Sent Credentials
             my $auth = $self->req->url->to_abs->userinfo || '';
 
@@ -107,7 +108,7 @@ L<http://github.com/tempire/mojolicious-plugin-basicauth>
 
 =head1 VERSION
 
-0.04
+0.05
 
 =head1 CREDITS
 

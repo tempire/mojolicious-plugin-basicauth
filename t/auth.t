@@ -57,8 +57,7 @@ get '/under-bridge' => sub {
 };
 
 # Tests
-my $client = app->client;
-my $t      = Test::Mojo->new;
+my $t = Test::Mojo->new;
 my $encoded;
 
 
