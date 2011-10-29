@@ -1,3 +1,6 @@
+0.06  2011-10-29
+    - Allow : in passwords (Kirill Miazine)
+
 0.05  2011-06-02
     - Removed unused reference to Mojo::Client in tests
     - Require Mojolicious >= 1.4

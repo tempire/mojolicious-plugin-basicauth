@@ -155,4 +155,3 @@ $encoded = b("username:password")->b64_encode->to_string;
 chop $encoded;
 $t->get_ok('/under-bridge', {Authorization => "Basic $encoded"})
   ->status_is(200)->content_is('authorized');
-
