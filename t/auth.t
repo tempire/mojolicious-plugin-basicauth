@@ -1,7 +1,7 @@
 use Mojo::IOLoop;
 use Test::More;
 use Test::Mojo;
-use Mojo::ByteStream;
+use Mojo::ByteStream 'b';
 
 # Make sure sockets are working
 plan skip_all => 'working sockets required for this test!'
