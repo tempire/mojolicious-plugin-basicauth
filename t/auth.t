@@ -98,7 +98,7 @@ foreach (
       ->content_is('denied');
 
     # Incorrect user/pass
-    $encoded = Mojo::ByteStream->new('bad:auth')->b64_encode->to_string;
+    $encoded = b('bad:auth')->b64_encode->to_string;
     chop $encoded;
     $t->get_ok($_, {Authorization => "Basic $encoded"})->status_is(401)
       ->header_is('WWW-Authenticate' => 'Basic realm=realm')
@@ -107,7 +107,7 @@ foreach (
 
 # Under bridge fail
 diag '/under-bridge';
-$encoded = Mojo::ByteStream->new("bad:auth")->b64_encode->to_string;
+$encoded = b("bad:auth")->b64_encode->to_string;
 chop $encoded;
 $t->get_ok('/under-bridge', {Authorization => "Basic $encoded"})
   ->status_is(401)->content_is('');
@@ -116,42 +116,42 @@ $t->get_ok('/under-bridge', {Authorization => "Basic $encoded"})
 
 # Username, password
 diag '/user-pass';
-$encoded = Mojo::ByteStream->new("username:password")->b64_encode->to_string;
+$encoded = b("username:password")->b64_encode->to_string;
 chop $encoded;
 $t->get_ok('/user-pass', {Authorization => "Basic $encoded"})->status_is(200)
   ->content_is('authorized');
 
 # Username, password with colon in password
 diag '/user-pass-with-colon-password';
-$encoded = Mojo::ByteStream->new("username:pass:word")->b64_encode->to_string;
+$encoded = b("username:pass:word")->b64_encode->to_string;
 chop $encoded;
 $t->get_ok('/user-pass-with-colon-password', {Authorization => "Basic $encoded"})->status_is(200)
   ->content_is('authorized');
 
 # Password only
 diag '/pass';
-$encoded = Mojo::ByteStream->new(":password")->b64_encode->to_string;
+$encoded = b(":password")->b64_encode->to_string;
 chop $encoded;
 $t->get_ok('/pass', {Authorization => "Basic $encoded"})->status_is(200)
   ->content_is('authorized');
 
 # With callback
 diag '/get-auth-callback';
-$encoded = Mojo::ByteStream->new("username:password")->b64_encode->to_string;
+$encoded = b("username:password")->b64_encode->to_string;
 chop $encoded;
 $t->get_ok('/get-auth-callback', {Authorization => "Basic $encoded"})
   ->status_is(200)->content_is('authorized');
 
 # With callback and colon in password
 diag '/get-auth-callback-with-colon-password';
-$encoded = Mojo::ByteStream->new("username:pass:word")->b64_encode->to_string;
+$encoded = b("username:pass:word")->b64_encode->to_string;
 chop $encoded;
 $t->get_ok('/get-auth-callback-with-colon-password', {Authorization => "Basic $encoded"})
   ->status_is(200)->content_is('authorized');
 
 # Under bridge
 diag '/under-bridge';
-$encoded = Mojo::ByteStream->new("username:password")->b64_encode->to_string;
+$encoded = b("username:password")->b64_encode->to_string;
 chop $encoded;
 $t->get_ok('/under-bridge', {Authorization => "Basic $encoded"})
   ->status_is(200)->content_is('authorized');
