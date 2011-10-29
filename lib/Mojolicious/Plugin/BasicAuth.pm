@@ -28,7 +28,7 @@ sub register {
               if !$auth and !$callback;
 
             # Verification within callback
-            return 1 if $callback and $callback->(split /:/, $auth);
+            return 1 if $callback and $callback->(split /:/, $auth, 2);
 
             # Verified with realm => username => password syntax
             return 1 if $auth eq ($username || '') . ":$password";

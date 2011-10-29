@@ -6,7 +6,7 @@ use Mojo::ByteStream;
 # Make sure sockets are working
 plan skip_all => 'working sockets required for this test!'
   unless Mojo::IOLoop->new->generate_port;    # Test server
-plan tests => 39;
+plan tests => 45;
 
 # Lite app
 use Mojolicious::Lite;
@@ -20,10 +20,19 @@ get '/user-pass' => sub {
     my $self = shift;
 
     #return $self->render_text('denied')
-    return $self->render(text => 'denied')
-      unless $self->basic_auth(realm => username => 'password');
+    return $self->render(text => 'authorized')
+      if $self->basic_auth(realm => username => 'password');
 
-    $self->render_text('authorized');
+    $self->render_text('denied');
+};
+
+get '/user-pass-with-colon-password' => sub {
+    my $self = shift;
+
+    return $self->render(text => 'authorized')
+      if $self->basic_auth(realm => username => 'pass:word');
+
+    $self->render_text('denied');
 };
 
 get '/pass' => sub {
@@ -39,17 +48,28 @@ get '/pass' => sub {
 get '/get-auth-callback' => sub {
     my $self = shift;
 
-    return $self->render_text('denied')
-      unless $self->basic_auth(
-        realm => sub { return 1 if "@_" eq 'username password' });
+    return $self->render_text('authorized')
+      if $self->basic_auth(
+        realm => sub { return "@_" eq 'username password' });
 
-    $self->render_text('authorized');
+    $self->render_text('denied');
+};
+
+# Callback with colon in password
+get '/get-auth-callback-with-colon-password' => sub {
+    my $self = shift;
+
+    return $self->render_text('authorized')
+      if $self->basic_auth(
+        realm => sub { return "@_" eq 'username pass:word' });
+
+    return $self->render_text('denied');
 };
 
 under sub {
     my $self = shift;
     return $self->basic_auth(
-        realm => sub { return 1 if "@_" eq 'username password' });
+        realm => sub { return "@_" eq 'username password' });
 };
 
 get '/under-bridge' => sub {
@@ -101,6 +121,13 @@ chop $encoded;
 $t->get_ok('/user-pass', {Authorization => "Basic $encoded"})->status_is(200)
   ->content_is('authorized');
 
+# Username, password with colon in password
+diag '/user-pass-with-colon-password';
+$encoded = Mojo::ByteStream->new("username:pass:word")->b64_encode->to_string;
+chop $encoded;
+$t->get_ok('/user-pass-with-colon-password', {Authorization => "Basic $encoded"})->status_is(200)
+  ->content_is('authorized');
+
 # Password only
 diag '/pass';
 $encoded = Mojo::ByteStream->new(":password")->b64_encode->to_string;
@@ -113,6 +140,13 @@ diag '/get-auth-callback';
 $encoded = Mojo::ByteStream->new("username:password")->b64_encode->to_string;
 chop $encoded;
 $t->get_ok('/get-auth-callback', {Authorization => "Basic $encoded"})
+  ->status_is(200)->content_is('authorized');
+
+# With callback and colon in password
+diag '/get-auth-callback-with-colon-password';
+$encoded = Mojo::ByteStream->new("username:pass:word")->b64_encode->to_string;
+chop $encoded;
+$t->get_ok('/get-auth-callback-with-colon-password', {Authorization => "Basic $encoded"})
   ->status_is(200)->content_is('authorized');
 
 # Under bridge
