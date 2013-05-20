@@ -23,7 +23,7 @@ get '/user-pass' => sub {
     return $self->render(text => 'authorized')
       if $self->basic_auth(realm => username => 'password');
 
-    $self->render_text('denied');
+    $self->render( text => 'denied' );
 };
 
 get '/user-pass-with-colon-password' => sub {
@@ -32,38 +32,38 @@ get '/user-pass-with-colon-password' => sub {
     return $self->render(text => 'authorized')
       if $self->basic_auth(realm => username => 'pass:word');
 
-    $self->render_text('denied');
+    $self->render( text => 'denied' );
 };
 
 get '/pass' => sub {
     my $self = shift;
 
-    return $self->render_text('denied')
+    return $self->render( text => 'denied' )
       unless $self->basic_auth(realm => 'password');
 
-    $self->render_text('authorized');
+    $self->render( text => 'authorized' );
 };
 
 # Entered user/pass supplied to callback
 get '/get-auth-callback' => sub {
     my $self = shift;
 
-    return $self->render_text('authorized')
+    return $self->render( text => 'authorized' )
       if $self->basic_auth(
         realm => sub { return "@_" eq 'username password' });
 
-    $self->render_text('denied');
+    $self->render( text => 'denied' );
 };
 
 # Callback with colon in password
 get '/get-auth-callback-with-colon-password' => sub {
     my $self = shift;
 
-    return $self->render_text('authorized')
+    return $self->render( text => 'authorized' )
       if $self->basic_auth(
         realm => sub { return "@_" eq 'username pass:word' });
 
-    return $self->render_text('denied');
+    return $self->render( text => 'denied' );
 };
 
 under sub {
