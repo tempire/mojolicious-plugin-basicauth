@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Mojo::ByteStream;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use base 'Mojolicious::Plugin';
 
