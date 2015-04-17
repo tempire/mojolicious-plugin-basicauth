@@ -68,7 +68,7 @@ Mojolicious::Plugin::BasicAuth - Basic HTTP Auth Helper
 
 =head1 DESCRIPTION
 
-L<Mojolicous::Plugin::BasicAuth> is a helper for basic http authentication.
+L<Mojolicious::Plugin::BasicAuth> is a helper for basic http authentication.
 
 =head1 USAGE
 
