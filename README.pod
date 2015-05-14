@@ -23,6 +23,41 @@ L<Mojolicous::Plugin::BasicAuth> is a helper for basic http authentication.
 
     app->start;
 
+Example of authed index page with Mojolicious
+
+    # MyApp.pm
+    use Mojo::Base 'Mojolicious';
+    sub startup {
+        my $self = shift;
+        $self->plugin('basic_auth');
+
+        my $r = $self->routes;
+
+        # a means authentication required routes
+        $a = $r->bridge('/')->to('Root#auth');
+
+        $a->get('/')->to('Root#auth');
+    }
+
+    # MyApp/Root.pm
+    use Mojo::Base 'Mojolicious::Controller';
+
+    sub auth {
+        my $self = shift;
+
+        return 1 if $self->basic_auth(
+                realm => sub {
+                    return 1 if "@_" eq 'username password'
+                }
+            );
+    }
+
+    sub index {
+        my $self = shift;
+
+        $self->render('hello world');
+    }
+
 =head1 METHODS
 
 L<Mojolicious::Plugin::BasicAuth> inherits all methods from
